@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayacama Research — Quantitative Intelligence for Institutional Capital</title>
+<meta name="description" content="Mayacama Research delivers institutional-grade quantitative research, simulation frameworks, and systematic trading infrastructure for sophisticated capital allocators.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F2EDE4;
+    --cream-dim: #D8D2C6;
+    --ink: #0C0B08;
+    --ink-mid: #1E1C17;
+    --ink-soft: #2E2B22;
+    --gold: #B8963E;
+    --gold-pale: #D4B06A;
+    --gold-dim: #6B5420;
+    --rule: rgba(184, 150, 62, 0.25);
+    --rule-dim: rgba(242, 237, 228, 0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.6;
+  }
+
+  /* ── GRID LINES ── */
+  .grid-lines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, var(--rule-dim) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--rule-dim) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--rule);
+    background: rgba(12, 11, 8, 0.85);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+
+  .nav-logo span {
+    color: var(--gold);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .nav-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover { color: var(--gold-pale); }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 0.55rem 1.25rem;
+    text-decoration: none;
+    transition: all 0.25s;
+  }
+
+  .nav-cta:hover {
+    background: rgba(184, 150, 62, 0.1);
+    border-color: var(--gold);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10rem 3rem 6rem;
+    overflow: hidden;
+  }
+
+  .hero-bg-number {
+    position: absolute;
+    right: -0.02em;
+    bottom: -0.15em;
+    font-size: clamp(12rem, 30vw, 28rem);
+    font-weight: 300;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(184, 150, 62, 0.07);
+    pointer-events: none;
+    font-style: italic;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .hero-headline {
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 14em;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--gold-pale);
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--cream-dim);
+    max-width: 38em;
+    line-height: 1.75;
+    margin-bottom: 3.5rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 1rem 2.25rem;
+    text-decoration: none;
+    transition: all 0.25s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-pale);
+    border-color: var(--gold-pale);
+  }
+
+  .btn-ghost {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--cream); }
+
+  .btn-ghost::after {
+    content: '→';
+    transition: transform 0.2s;
+  }
+
+  .btn-ghost:hover::after { transform: translateX(4px); }
+
+  /* ── TICKER ── */
+  .ticker-bar {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.85rem 0;
+    overflow: hidden;
+    position: relative;
+    background: rgba(12, 11, 8, 0.5);
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 4rem;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--cream-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .ticker-item .label { color: var(--gold); }
+  .ticker-item .up { color: #6FA86F; }
+  .ticker-item .down { color: #A86F6F; }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 7rem 3rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  h2 {
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  h2 em { font-style: italic; color: var(--gold-pale); }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+    margin-top: 4rem;
+  }
+
+  .about-body {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--cream-dim);
+  }
+
+  .about-body p + p { margin-top: 1.4em; }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .stat-box {
+    border: 1px solid var(--rule);
+    padding: 2rem 1.75rem;
+    background: rgba(184, 150, 62, 0.03);
+  }
+
+  .stat-num {
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--gold-pale);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+  }
+
+  /* ── CAPABILITIES ── */
+  .capabilities-section {
+    border-top: 1px solid var(--rule);
+    background: var(--ink-mid);
+  }
+
+  .caps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 4rem;
+  }
+
+  .cap-card {
+    padding: 2.75rem 2.25rem;
+    border: 1px solid var(--rule);
+    background: rgba(12, 11, 8, 0.6);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .cap-card:hover { background: rgba(184, 150, 62, 0.04); }
+
+  .cap-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+  }
+
+  .cap-icon {
+    width: 2.5rem;
+    height: 2px;
+    background: var(--gold);
+    margin-bottom: 2rem;
+  }
+
+  .cap-title {
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-bottom: 1rem;
+  }
+
+  .cap-body {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--cream-dim);
+  }
+
+  .cap-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 0.3rem 0.65rem;
+    display: inline-block;
+    margin-top: 1.75rem;
+  }
+
+  /* ── PHILOSOPHY ── */
+  .philosophy-section {
+    border-top: 1px solid var(--rule);
+  }
+
+  .philosophy-quote {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--cream);
+    max-width: 28em;
+    border-left: 1px solid var(--gold);
+    padding-left: 2.5rem;
+    margin: 4rem 0;
+  }
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule);
+    margin-top: 4rem;
+  }
+
+  .pillar {
+    padding: 2.5rem 1.75rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .pillar:last-child { border-right: none; }
+
+  .pillar-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 1.25rem;
+  }
+
+  .pillar-title {
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: 0.85rem;
+  }
+
+  .pillar-body {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--cream-dim);
+  }
+
+  /* ── CONTACT ── */
+  .contact-section {
+    border-top: 1px solid var(--rule);
+    background: var(--ink-mid);
+  }
+
+  .contact-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 8rem 3rem;
+  }
+
+  .contact-inner h2 { margin-bottom: 1.5rem; }
+
+  .contact-inner p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--cream-dim);
+    margin-bottom: 3rem;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .form-group label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: rgba(242, 237, 228, 0.04);
+    border: 1px solid var(--rule);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: rgba(216, 210, 198, 0.3); }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: rgba(184, 150, 62, 0.5);
+  }
+
+  .form-group select option { background: #1E1C17; }
+
+  .form-group textarea { resize: none; min-height: 120px; }
+
+  .form-submit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 1rem 2.25rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  .form-submit:hover {
+    background: var(--gold-pale);
+    border-color: var(--gold-pale);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .footer-logo span { color: var(--gold); }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    color: var(--cream-dim);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--gold-pale); }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-right { gap: 1.5rem; }
+    .hero { padding: 8rem 1.5rem 5rem; }
+    .section-inner { padding: 5rem 1.5rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .caps-grid { grid-template-columns: 1fr; }
+    .pillars { grid-template-columns: 1fr 1fr; }
+    .pillar:nth-child(2) { border-right: none; }
+    .form-row { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+  }
+
+  @media (max-width: 600px) {
+    .nav-right .nav-link { display: none; }
+    .pillars { grid-template-columns: 1fr; }
+    .pillar { border-right: none; border-bottom: 1px solid var(--rule); }
+    .pillar:last-child { border-bottom: none; }
+    .about-stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-lines" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Mayacama<span>.</span></div>
+  <div class="nav-right">
+    <a href="#about" class="nav-link">About</a>
+    <a href="#capabilities" class="nav-link">Capabilities</a>
+    <a href="#philosophy" class="nav-link">Philosophy</a>
+    <a href="#contact" class="nav-cta">Inquire</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-number" aria-hidden="true">α</div>
+  <div class="hero-eyebrow">Mayacama Research — Institutional Grade</div>
+  <h1 class="hero-headline">
+    Where <em>rigorous</em> quantitative<br>research meets<br>systematic capital.
+  </h1>
+  <p class="hero-sub">
+    We build the infrastructure, models, and analytical frameworks that give sophisticated allocators a durable edge — across strategy cycles, market regimes, and asset classes.
+  </p>
+  <div class="hero-actions">
+    <a href="#contact" class="btn-primary">Request Access</a>
+    <a href="#capabilities" class="btn-ghost">Our Capabilities</a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-bar" aria-hidden="true">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item"><span class="label">BACKTESTING ENGINE</span> — Next-generation simulation framework</div>
+    <div class="ticker-item"><span class="label">DATA SIM</span> — Synthetic regime generation &amp; stress modeling</div>
+    <div class="ticker-item"><span class="label">ALPHA RESEARCH</span> — Factor construction &amp; signal validation</div>
+    <div class="ticker-item"><span class="label">EXECUTION ANALYTICS</span> — Slippage modeling &amp; cost attribution</div>
+    <div class="ticker-item"><span class="label">PORTFOLIO OPT.</span> — Constrained mean-variance &amp; beyond</div>
+    <div class="ticker-item"><span class="label">RISK SYSTEMS</span> — Tail-risk quantification &amp; drawdown analysis</div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><span class="label">BACKTESTING ENGINE</span> — Next-generation simulation framework</div>
+    <div class="ticker-item"><span class="label">DATA SIM</span> — Synthetic regime generation &amp; stress modeling</div>
+    <div class="ticker-item"><span class="label">ALPHA RESEARCH</span> — Factor construction &amp; signal validation</div>
+    <div class="ticker-item"><span class="label">EXECUTION ANALYTICS</span> — Slippage modeling &amp; cost attribution</div>
+    <div class="ticker-item"><span class="label">PORTFOLIO OPT.</span> — Constrained mean-variance &amp; beyond</div>
+    <div class="ticker-item"><span class="label">RISK SYSTEMS</span> — Tail-risk quantification &amp; drawdown analysis</div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label">About</div>
+    <h2>Built for those who<br>require <em>more</em> than consensus.</h2>
+    <div class="about-grid">
+      <div class="about-body fade-up">
+        <p>Mayacama Research was founded on a single conviction: that the most durable alpha in markets is not discovered — it is engineered. Through first-principles quantitative research and proprietary simulation infrastructure, we develop the tools that let institutional allocators think and act with genuine precision.</p>
+        <p>Our work sits at the intersection of financial theory, applied mathematics, and computational design. We are not a fund. We are not a data vendor. We are the analytical architecture that powers what comes next.</p>
+        <p>Engagement with Mayacama Research is by introduction only. We work with a select group of hedge funds, family offices, and institutional allocators for whom the standard toolkit is insufficient.</p>
+      </div>
+      <div class="about-stats fade-up">
+        <div class="stat-box">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Core Research Pillars</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Simulation Resolution</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">01</div>
+          <div class="stat-label">Firm Priority: Edge</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">—</div>
+          <div class="stat-label">Discretionary AUM Managed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section id="capabilities" class="capabilities-section">
+  <div class="section-inner">
+    <div class="section-label">Capabilities</div>
+    <h2>Three domains.<br><em>One</em> integrated advantage.</h2>
+    <div class="caps-grid">
+      <div class="cap-card fade-up" data-num="01">
+        <div class="cap-icon"></div>
+        <div class="cap-title">Strategy Backtesting</div>
+        <p class="cap-body">High-fidelity historical simulation with rigorous look-ahead prevention, transaction cost modeling, and multi-asset execution logic. Built to expose where strategies break — before capital is at risk.</p>
+        <span class="cap-tag">In Development</span>
+      </div>
+      <div class="cap-card fade-up" data-num="02" style="transition-delay:0.1s">
+        <div class="cap-icon"></div>
+        <div class="cap-title">Data Simulation</div>
+        <p class="cap-body">Synthetic scenario generation, stress-regime construction, and Monte Carlo frameworks calibrated to empirical market structure. Explore the distribution of outcomes, not just the historical path.</p>
+        <span class="cap-tag">In Development</span>
+      </div>
+      <div class="cap-card fade-up" data-num="03" style="transition-delay:0.2s">
+        <div class="cap-icon"></div>
+        <div class="cap-title">Trading Algorithm Infrastructure</div>
+        <p class="cap-body">Systematic strategy frameworks spanning signal generation, portfolio construction, and execution optimization. Designed for institutions where operational precision is non-negotiable.</p>
+        <span class="cap-tag">In Development</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy" class="philosophy-section">
+  <div class="section-inner">
+    <div class="section-label">Philosophy</div>
+    <h2>Research is a<br>long-horizon <em>discipline.</em></h2>
+    <blockquote class="philosophy-quote fade-up">
+      "The market does not reward complexity. It rewards clarity — about what you know, what you don't, and how much of your capital is at stake on the difference."
+    </blockquote>
+    <div class="pillars fade-up">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Empirical Rigor</div>
+        <p class="pillar-body">Every model begins with data, not conviction. We test against reality before we trust any theoretical construct.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Regime Awareness</div>
+        <p class="pillar-body">Markets change structure. We build systems that acknowledge this — and stress-test against the regimes that don't yet exist.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Operational Discipline</div>
+        <p class="pillar-body">Good research poorly implemented is indistinguishable from bad research. Execution is a first-order concern, not an afterthought.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">04</div>
+        <div class="pillar-title">Selective Engagement</div>
+        <p class="pillar-body">We work with few. Each engagement receives the full attention of the firm. We do not scale by compromising depth.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="contact-inner">
+    <div class="section-label" style="justify-content:center">Contact</div>
+    <h2>Begin a <em>conversation.</em></h2>
+    <p>Access to Mayacama Research is limited and by introduction. If you represent an institutional allocator or hedge fund and wish to learn more, we welcome a brief introduction.</p>
+    <form class="contact-form" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Full name" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="firm">Firm</label>
+          <input type="text" id="firm" placeholder="Firm or institution">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Work email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="type">Allocator Type</label>
+          <select id="type">
+            <option value="" disabled selected>Select…</option>
+            <option>Hedge Fund</option>
+            <option>Family Office</option>
+            <option>Endowment / Foundation</option>
+            <option>Asset Manager</option>
+            <option>Other Institutional</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="message">Brief Introduction</label>
+        <textarea id="message" placeholder="Tell us about your firm and what you're looking to solve…"></textarea>
+      </div>
+      <button type="submit" class="form-submit">Submit Inquiry</button>
+      <div id="form-msg" style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--gold);display:none;margin-top:0.5rem;">Inquiry received. We will be in touch.</div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Mayacama<span>.</span></div>
+  <div class="footer-copy">© 2025 Mayacama Research. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+  // Intersection observer for fade-up
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+  // Form submit
+  function handleSubmit(e) {
+    e.preventDefault();
+    document.getElementById('form-msg').style.display = 'block';
+    e.target.querySelector('.form-submit').style.opacity = '0.4';
+    e.target.querySelector('.form-submit').disabled = true;
+  }
+</script>
+</body>
+</html>
